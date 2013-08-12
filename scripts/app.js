@@ -49,8 +49,8 @@ $(document).ready(function () {
 
 		events: {
 			"click .delete": "clear",
-			"blur .book_title": 'changeTitle',
-			"blur .book_author": 'changeAuthor'
+			"change .book_title": 'changeTitle',
+			"change .book_author": 'changeAuthor'
 		},
 
 		initialize: function () {
@@ -73,13 +73,13 @@ $(document).ready(function () {
 		},
 
 		changeTitle: function(e){
-			this.model.set({name:e.currentTarget.value})
-			//this.model.set({name:this.inputTitle.val()})
+			//this.model.set({name:e.currentTarget.value})
+			this.model.set({name:this.inputTitle.val()})
 		},
 
 		changeAuthor: function(e){
-			this.model.set({author:e.currentTarget.value})
-			//this.model.set({author:this.inputAuthor.val()})
+			//this.model.set({author:e.currentTarget.value})
+			this.model.set({author:this.inputAuthor.val()})
 		}
 
 	});
@@ -101,9 +101,8 @@ $(document).ready(function () {
 			this.listenTo(CreateBooks, 'reset', this.addAll)
 			this.listenTo(CreateBooks, 'remove', this.removeModel)
 			this.listenTo(CreateBooks, 'all', this.render)
-			this.listenTo(CreateBooks, 'all', this.render)
 
-			CreateBooks.fetch();
+			//CreateBooks.fetch(); // nothin to fetch...
 			this.countEl =  this.$('.count');
 		},
 
@@ -112,11 +111,13 @@ $(document).ready(function () {
 				alert('Please add a book.');
 			else
 			{
+				// we need to clone the models before add the to the BookCollection
 				_.each(CreateBooks.models,function(model){
 					BookCollection.add(new Book(model.toJSON()));
 				},this);
 
-				CreateBooks.clear();
+
+				CreateBooks.reset();
 			}
 		},
 
@@ -134,6 +135,7 @@ $(document).ready(function () {
 		addAll: function () {
 			CreateBooks.each(this.addOne, this);
 			this.updateCount();
+			this.render();
 		},
 		removeModel: function () {
 			this.updateCount();
