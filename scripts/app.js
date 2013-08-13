@@ -102,13 +102,15 @@ $(document).ready(function () {
 
 		initialize: function () {
 
-			this.listenTo(CreateBooks, 'add', this.addBook)
-			this.listenTo(CreateBooks, 'reset', this.resetBooks)
-			this.listenTo(CreateBooks, 'remove', this.removeModel)
-			this.listenTo(CreateBooks, 'all', this.allEvents)
-
 			//CreateBooks.fetch(); // nothin to fetch...
 			this.countEl =  this.$('.count');
+
+			this.listenTo(CreateBooks, 'add', this.addBook)
+			this.listenTo(CreateBooks, 'reset', this.resetBooks)
+			this.listenTo(CreateBooks, 'remove', this.render)
+			this.listenTo(CreateBooks, 'all', this.render)
+
+
 		},
 
 		createBooks: function () {
@@ -135,40 +137,36 @@ $(document).ready(function () {
 			if(CreateBooks.length == 0 || (CreateBooks.last().isValid()))
 			{
 				CreateBooks.push(new Book());
-				this.updateCount();
 			}
 
 		},
 
 		addBook: function (amodel) {
 			var bookItem = new CreateBookItemView({model: amodel})
-			this.$('#books_list').append(bookItem.render().el)
-			this.updateCount();
+			this.$('.books_list').append(bookItem.render().el)
 		},
 
 		resetBooks: function () {
 			CreateBooks.each(this.addBook, this);
-			this.updateCount();
-
-		},
-		removeModel: function () {
-			this.updateCount();
 		},
 
 		updateCount: function(){
 			this.countEl.html(CreateBooks.length)
 		},
 
-		allEvents: function(){
+		render: function(){
 
 			this.updateCount();
-			this.render();
+			return this
 		}
+
 	});
 
 
 	var BookListItemView = Backbone.View.extend({
+
 		tagName: 'li',
+
 		template: _.template( $('#book-list-item-template').html() ),
 
 		initialize: function () {
@@ -188,6 +186,7 @@ $(document).ready(function () {
 
 		render: function () {
 
+			console.log(this.template(this.model.toJSON()));
 			this.$el.html( this.template(this.model.toJSON()) );
 			return this;
 		}
@@ -199,35 +198,36 @@ $(document).ready(function () {
 
 		initialize: function () {
 
-			this.listenTo(BookCollection, 'add', this.addOne)
+			this.countEl =  this.$('.count');
+			this.bookItems = this.$('.book_items');
+
+			this.listenTo(BookCollection, 'add', this.addBook)
 			this.listenTo(BookCollection, 'reset', this.addAll)
-			this.listenTo(BookCollection, 'remove', this.renderModel)
+			this.listenTo(BookCollection, 'remove', this.render)
 			this.listenTo(BookCollection, 'all', this.render)
 
 			BookCollection.fetch();
-			this.countEl =  this.$('.count');
-			this.bookItems = this.$('#book_items');
+
 		},
 
-		addOne: function (amodel) {
+		addBook: function (amodel) {
 
 			var bookItem = new BookListItemView({model: amodel})
 			this.bookItems.append(bookItem.render().el)
-			this.updateCount();
 		},
 
 		addAll: function () {
 			BookCollection.each(this.addOne, this);
-			this.updateCount();
-		},
-
-		renderModel: function () {
-			this.updateCount();
-			this.render();
 		},
 
 		updateCount: function(){
 			this.countEl.html(BookCollection.length)
+		},
+
+		render: function(){
+
+			this.updateCount();
+			return this
 		}
 
 
