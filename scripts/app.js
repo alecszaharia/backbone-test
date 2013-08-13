@@ -12,7 +12,14 @@ $(document).ready(function () {
 	var Book = Backbone.Model.extend({
 		defaults: function () {
 			return { author: '', title: '', read: false };
+		},
+		validate: function(attrs,options){
+			if(attrs.title=='')
+				return 'Title cannot be null';
+			if(attrs.author=='')
+				return 'Author cannot be null';
 		}
+
 	});
 
 
@@ -66,20 +73,18 @@ $(document).ready(function () {
 		},
 
 		render: function () {
-
 			this.$el.html(this.template(this.model.toJSON()));
-
 			return this;
 		},
 
 		changeTitle: function(e){
-			//this.model.set({name:e.currentTarget.value})
-			this.model.set({name:this.inputTitle.val()})
+			// add silent:true to not loose the focus.. the change event will not be triggered as there is no need to render the for again.
+			this.model.set({title:e.currentTarget.value},{silent:true});
 		},
 
 		changeAuthor: function(e){
-			//this.model.set({author:e.currentTarget.value})
-			this.model.set({author:this.inputAuthor.val()})
+			// add silent:true to not loose the focus.. the change event will not be triggered as there is no need to render the for again.
+			this.model.set({author:e.currentTarget.value},{silent:true})
 		}
 
 	});
@@ -97,10 +102,10 @@ $(document).ready(function () {
 
 		initialize: function () {
 
-			this.listenTo(CreateBooks, 'add', this.addOne)
-			this.listenTo(CreateBooks, 'reset', this.addAll)
+			this.listenTo(CreateBooks, 'add', this.addBook)
+			this.listenTo(CreateBooks, 'reset', this.resetBooks)
 			this.listenTo(CreateBooks, 'remove', this.removeModel)
-			this.listenTo(CreateBooks, 'all', this.render)
+			this.listenTo(CreateBooks, 'all', this.allEvents)
 
 			//CreateBooks.fetch(); // nothin to fetch...
 			this.countEl =  this.$('.count');
@@ -116,57 +121,74 @@ $(document).ready(function () {
 					BookCollection.add(new Book(model.toJSON()));
 				},this);
 
-
-				CreateBooks.reset();
+				// destroy all books from the create list
+				while(CreateBooks.length!=0)
+				{
+					var t = CreateBooks.pop()
+					t.destroy();
+				}
 			}
 		},
 
 		newBook: function () {
-			CreateBooks.push(new Book());
-			this.updateCount();
+
+			if(CreateBooks.length == 0 || (CreateBooks.last().isValid()))
+			{
+				CreateBooks.push(new Book());
+				this.updateCount();
+			}
+
 		},
 
-		addOne: function (amodel) {
+		addBook: function (amodel) {
 			var bookItem = new CreateBookItemView({model: amodel})
 			this.$('#books_list').append(bookItem.render().el)
 			this.updateCount();
 		},
 
-		addAll: function () {
-			CreateBooks.each(this.addOne, this);
+		resetBooks: function () {
+			CreateBooks.each(this.addBook, this);
 			this.updateCount();
-			this.render();
+
 		},
 		removeModel: function () {
 			this.updateCount();
-			this.render
 		},
 
 		updateCount: function(){
 			this.countEl.html(CreateBooks.length)
+		},
+
+		allEvents: function(){
+
+			this.updateCount();
+			this.render();
 		}
 	});
 
 
 	var BookListItemView = Backbone.View.extend({
 		tagName: 'li',
-		template: _.template($('#book-list-item-template').html()),
+		template: _.template( $('#book-list-item-template').html() ),
 
 		initialize: function () {
-			this.listenTo(this.model, 'change', this.render);
+			this.listenTo(this.model, 'change', this.modelChanged);
 			this.listenTo(this.model, 'destroy', this.remove);
 		},
 
-		events: {
-			"click .delete": "clear"
-		},
+		events: {  "click .delete": "clear" },
 
 		clear: function () {
 			this.model.destroy();
 		},
 
+		modelChanged: function(){
+			this.render();
+		},
+
 		render: function () {
-			this.$el.html(this.template(this.model.toJSON()));
+
+			this.$el.html( this.template(this.model.toJSON()) );
 			return this;
 		}
 
