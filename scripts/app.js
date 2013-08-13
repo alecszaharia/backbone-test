@@ -186,7 +186,7 @@ $(document).ready(function () {
 
 		render: function () {
 
-			console.log(this.template(this.model.toJSON()));
+			console.log( this.template(this.model.toJSON()) );
 			this.$el.html( this.template(this.model.toJSON()) );
 			return this;
 		}
