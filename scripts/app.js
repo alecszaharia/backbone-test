@@ -19,7 +19,7 @@ $(document).ready(function () {
 				return 'Title cannot be null';
 			if(attrs.author=='')
 				return 'Author cannot be null';
-		},
+		}
 
 	});
 
