@@ -185,7 +185,6 @@ $(document).ready(function () {
 		},
 
 		render: function () {
-
 			console.log( this.template(this.model.toJSON()) );
 			this.$el.html( this.template(this.model.toJSON()) );
 			return this;
@@ -201,13 +200,12 @@ $(document).ready(function () {
 			this.countEl =  this.$('.count');
 			this.bookItems = this.$('.book_items');
 
-			this.listenTo(BookCollection, 'add', this.addBook)
-			this.listenTo(BookCollection, 'reset', this.addAll)
-			this.listenTo(BookCollection, 'remove', this.render)
-			this.listenTo(BookCollection, 'all', this.render)
+			this.listenTo(BookCollection, 'add', this.addBook);
+			this.listenTo(BookCollection, 'reset', this.addAll);
+			this.listenTo(BookCollection, 'remove', this.render);
+			this.listenTo(BookCollection, 'all', this.render);
 
 			BookCollection.fetch();
-
 		},
 
 		addBook: function (amodel) {
