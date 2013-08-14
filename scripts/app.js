@@ -11,14 +11,15 @@ $(document).ready(function () {
 	 */
 	var Book = Backbone.Model.extend({
 		defaults: function () {
-			return { author: '', title: '', read: false };
+			return { author: '', title: '', marked: false,selected:false };
 		},
+
 		validate: function(attrs,options){
 			if(attrs.title=='')
 				return 'Title cannot be null';
 			if(attrs.author=='')
 				return 'Author cannot be null';
-		}
+		},
 
 	});
 
@@ -66,6 +67,7 @@ $(document).ready(function () {
 
 			this.inputTitle = this.$('.book_title')
 			this.inputAuthor = this.$('.book_author')
+
 		},
 
 		clear: function () {
@@ -170,30 +172,49 @@ $(document).ready(function () {
 		template: _.template( $('#book-list-item-template').html() ),
 
 		initialize: function () {
+
+			//this.selected = this.$('.selected')
+
 			this.listenTo(this.model, 'change', this.modelChanged);
 			this.listenTo(this.model, 'destroy', this.remove);
 		},
 
-		events: {  "click .delete": "clear" },
+		events: {   "click .delete": "clear",
+					"click .mark": "mark",
+					"click .unmark": "unmark",
+					"click .selected": 'toggleSelected'
+				},
 
 		clear: function () {
 			this.model.destroy();
+		},
+
+		mark: function(){
+			this.model.set({marked:true})
+		},
+
+		unmark: function(){
+			this.model.set({marked:false})
 		},
 
 		modelChanged: function(){
 			this.render();
 		},
 
+		toggleSelected: function(e){
+			this.model.set({selected:e.currentTarget.checked},{silent:true})
+		},
+
 		render: function () {
-			console.log( this.template(this.model.toJSON()) );
 			this.$el.html( this.template(this.model.toJSON()) );
 			return this;
 		}
-
 	});
 
 	var BookListView = Backbone.View.extend({
 		el: $('#book_list'),
+
+		events: { "click .delete-selected": "deleteSelected" },
 
 		initialize: function () {
 
@@ -208,8 +229,9 @@ $(document).ready(function () {
 			BookCollection.fetch();
 		},
 
-		addBook: function (amodel) {
 
+		/* model events */
+		addBook: function (amodel) {
 			var bookItem = new BookListItemView({model: amodel})
 			this.bookItems.append(bookItem.render().el)
 		},
@@ -222,13 +244,19 @@ $(document).ready(function () {
 			this.countEl.html(BookCollection.length)
 		},
 
+		/* view events */
+		deleteSelected: function(){
+			var selected = BookCollection.where({selected:true});
+			var m = null;
+			while( m = selected.pop()) m.destroy();
+
+		},
+
 		render: function(){
 
 			this.updateCount();
 			return this
 		}
-
-
 	});
 
 

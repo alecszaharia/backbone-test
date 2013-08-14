@@ -26,6 +26,7 @@
     <div class="grid_6" id="book_list">
         <h2>Book list</h2>
         <ul class="book_items"></ul>
+        <input type="button" name="delete" value="Delete selected" class="delete-selected">
         <span class="count">0</span>
     </div>
 </div>
@@ -37,7 +38,15 @@
         <input type="button" name="delete" value="-" class="delete">
     </script>
 <script type="text/template" id="book-list-item-template">
-        <div><%-title%> by <%-author%><input type="button" name="delete" value="-" class="delete"></div>
+        <input type="checkbox" class="selected" name="selected" value="1"/>
+        <%-title%> by <%-author%>
+        <%
+            if(!marked)
+            { %><input type="button" name="mark" value="mark" class="mark"><% }
+            else
+            { %><input type="button" name="unmark" value="unmark" class="unmark"><% }
+
+        %><input type="button" name="delete" value="-" class="delete">
 </script>
 
 <script src="scripts/jQuery.js" type="text/javascript"></script>
