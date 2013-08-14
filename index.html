@@ -38,7 +38,7 @@
         <input type="button" name="delete" value="-" class="delete">
     </script>
 <script type="text/template" id="book-list-item-template">
-        <input type="checkbox" class="selected" name="selected" value="1"/>
+        <input type="checkbox" class="selected" name="selected[]" value="1"/>
         <%-title%> by <%-author%>
         <%
             if(!marked)
